@@ -33,6 +33,12 @@ extern "C" {
 #include "../../hardware/arduino/avr/libraries/Wire/src/utility/twi.h"
 #elif ( ARDUINO == 10605 )
 #include "../../hardware/arduino/avr/libraries/Wire/utility/twi.h"
+#elif ( ARDUINO == 10612 )
+//#include "../../hardware/esp8266/2.3.0/cores/esp8266/twi.h"
+/*uint8_t twi_writeTo2(uint8_t address, uint8_t* data, uint8_t length, uint8_t wait, uint8_t sendStop) {
+    twi_writeTo(address, data, length, sendStop);
+}
+#define twi_writeTo twi_writeTo2*/
 #else
 uint8_t twi_writeTo(uint8_t, uint8_t*, uint8_t, uint8_t, uint8_t);
 #endif
@@ -65,7 +71,7 @@ BaseI2CDevice::BaseI2CDevice(uint8_t i2c_address)
 void BaseI2CDevice::initProtocol()
 {
   if ( b_initialized ) return;
-  Wire.begin();
+  Wire.begin(D2,D3);
   b_initialized = true;
 }
 
@@ -299,7 +305,7 @@ bool BaseI2CDevice::checkAddress()
   #if defined(ARDUINO) && ARDUINO <= 100
     x = twi_writeTo(_device_address, txBuffer, 0, 1) == 0;
   #else
-    x = twi_writeTo(_device_address, txBuffer, 0, 1, 1) == 0;
+    x = twi_writeTo(_device_address, txBuffer, 0, 1) == 0;
   #endif
 #endif
   return (x != 0);

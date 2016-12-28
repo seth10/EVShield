@@ -98,7 +98,7 @@ typedef enum {
   #define SDA_BBS2  A15
 
   #define BTN_LEFT  16
-  #define BTN_GO  15
+  #define BTN_GO  1
   #define BTN_RIGHT 14
   #define LED_RED  16
   #define LED_GREEN  15

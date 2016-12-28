@@ -66,11 +66,11 @@ EVShield::EVShield(uint8_t i2c_address_a, uint8_t i2c_address_b)
 
 void EVShield::init(SH_Protocols protocol)
 {
-    while (initCounter < 5){
+    //while (initCounter < 5){
     //Serial.println(initCounter);
     I2CTimer();
 	initProtocols(protocol);    
-   }
+   //}
 }
 
 void EVShield::initProtocols(SH_Protocols protocol)
@@ -763,13 +763,13 @@ void pingEV()
         Wire.beginTransmission(0x34);
         Wire.endTransmission();
     #else
-        TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
+        /*TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
         while ((TWCR & (1<<TWINT)) == 0);
         TWDR = 0x34;
         TWCR = (1<<TWINT)|(1<<TWEN);
         while ((TWCR & (1<<TWINT)) == 0);
         TWCR = (1<<TWINT)|(1<<TWSTO)|(1<<TWEN);
-        TCNT2  = 0;//initialize counter value to 0    
+        TCNT2  = 0;//initialize counter value to 0    */
         /*
         if (toggle2)
         {
