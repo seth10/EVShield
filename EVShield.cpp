@@ -20,26 +20,11 @@
 
 #include "EVShield.h"
 #include "Wire.h"
-#if defined(ARDUINO_ARC32_TOOLS)
-  #include "CurieTimerOne.h"
-#else
-  #include "MsTimer2.h"
-#endif
+#include "MsTimer2.h"
 static void pingEV();
-
-#if defined(__AVR__)
-	static void callbackLED();
-#elif defined(__PIC32MX__)
-	uint32_t callbackLED(uint32_t);
-#endif
 
 byte initCounter = 0;
 bool btnState_go, btnState_left, btnState_right;
-uint8_t redLED, redLED_cp;
-uint8_t greenLED, greenLED_cp;
-uint8_t blueLED, blueLED_cp;
-
-bool toggle2 = 0;
 
 bool format_bin(uint8_t i, char *s)
 {
@@ -69,7 +54,7 @@ void EVShield::init(SH_Protocols protocol)
     //while (initCounter < 5){
     //Serial.println(initCounter);
     I2CTimer();
-	initProtocols(protocol);    
+    initProtocols(protocol);    
    //}
 }
 
@@ -132,24 +117,8 @@ void EVShield::initProtocols(SH_Protocols protocol)
 
 void EVShield::I2CTimer()
 {
-#if defined(ARDUINO_ARC32_TOOLS)
-  CurieTimerOne.start(300000, pingEV); // in microseconds
-#else
-  //TCNT2  = 0; 
   MsTimer2::set(300, pingEV); // 300ms period
   MsTimer2::start(); 
-#endif
-}
-
-void EVShield::initLEDTimers()
-{
-  #if defined(__AVR__)
-
-	  MsTimer2::set(3, callbackLED);
-	  MsTimer2::start();
-#elif defined(__PIC32MX__)
-	  attachCoreTimerService(callbackLED);
-#endif
 }
 
 EVShieldBankB::EVShieldBankB(uint8_t i2c_address)
@@ -163,22 +132,7 @@ EVShieldBank::EVShieldBank(uint8_t i2c_address)
 {
 
 }
-/*
-void EVShield::I2CTimer(){
-  //set timer2 interrupt at 64kHz
-  TCCR2A = 0;// set entire TCCR2A register to 0
-  TCCR2B = 0;// same for TCCR2B
-  TCNT2  = 0;//initialize counter value to 0
-  // set compare match register for 64khz increments or 300ms
-  OCR2A = 74;// = (16*10^6) / (64000*3.3333) - 1 (must be <256)
-  // turn on CTC mode
-  TCCR2A |= (1 << WGM21);
-  // Set CS21 bit for 64 prescaler
-  TCCR2B |= (1 << CS22);   
-  // enable timer compare interrupt
-  TIMSK2 |= (1 << OCIE2A);  
-}
-*/
+
 // provided for backword compatibility with nxshield programs.
 int EVShieldBank::nxshieldGetBatteryVoltage()
 {
@@ -302,22 +256,10 @@ bool EVShieldBank::motorSetSpeedPID(uint16_t Kp, uint16_t Ki, uint16_t Kd)
   return writeRegisters(SH_SPEED_PID, 6);
 }
 
-bool EVShieldBank::centerLedSetRGB(uint8_t R, uint8_t G, uint8_t B)
-{
-  bool b;
-  writeByteToBuffer(_i2c_buffer, R);
-  writeByteToBuffer(_i2c_buffer+1,G);
-  writeByteToBuffer(_i2c_buffer+2,B);
-  b = writeRegisters(SH_CENTER_RGB_LED, 3);
-  delay(1);   // required to avoid subsequent i2c errors.
-  return b;
-}
-// Set the RGBLED that shows RGB color
 
 // TODO: it's noticed that i2c call made after ledSetRGB call fails.
 // a delay is added to avoid the errors, but
 // see why it fails and find a better solution.
-
 bool EVShieldBank::ledSetRGB(uint8_t R, uint8_t G, uint8_t B)
 {
   bool b;
@@ -759,105 +701,9 @@ int EVShieldBankB::sensorReadRaw(uint8_t which_sensor)
 
 void pingEV()
 {
-    #if defined(ARDUINO_ARC32_TOOLS)
-        Wire.beginTransmission(0x34);
-        Wire.endTransmission();
-    #else
-        /*TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
-        while ((TWCR & (1<<TWINT)) == 0);
-        TWDR = 0x34;
-        TWCR = (1<<TWINT)|(1<<TWEN);
-        while ((TWCR & (1<<TWINT)) == 0);
-        TWCR = (1<<TWINT)|(1<<TWSTO)|(1<<TWEN);
-        TCNT2  = 0;//initialize counter value to 0    */
-        /*
-        if (toggle2)
-        {
-          digitalWrite(13, HIGH);
-          toggle2 = 0;
-        }
-        else
-        {
-          digitalWrite(13, LOW);
-          toggle2 = 1; 
-        }
-        */
-    #endif
+  Wire.beginTransmission(0x34);
+  Wire.endTransmission();
 }
-
-#if defined(__AVR__)
-
-void callbackLED()
-{
-  static uint8_t index = 1;
-
-  //pinMode(BTN_GO,INPUT);
-  //btnState_go = !digitalRead(BTN_GO);
-  //pinMode(BTN_GO,OUTPUT);
-
-  pinMode(BTN_LEFT,INPUT);
-  btnState_left = !digitalRead(BTN_LEFT);
-  pinMode(BTN_LEFT,OUTPUT);
-
-  pinMode(BTN_RIGHT,INPUT);
-  btnState_right = !digitalRead(BTN_RIGHT);
-  pinMode(BTN_RIGHT,OUTPUT);
-
-  digitalWrite(LED_RED, !redLED_cp&0x01);
-  digitalWrite(LED_GREEN, !greenLED_cp&0x01);
-  digitalWrite(LED_BLUE, !blueLED_cp&0x01);
-
-  if (index == 8){
-    index = 1;
-    redLED_cp   = redLED;
-    greenLED_cp = greenLED;
-    blueLED_cp  = blueLED;
-  }
-  else{
-    redLED_cp    = redLED_cp   >>1;
-    greenLED_cp  = greenLED_cp >>1;
-    blueLED_cp   = blueLED_cp  >>1;
-    index ++;
-  }
-
-}
-#elif defined(__PIC32MX__)
-uint32_t callbackLED(uint32_t currentTime)
-{
-  static uint8_t index = 1;
-
-  //pinMode(BTN_GO,INPUT);
-  //btnState_go = !digitalRead(BTN_GO);
-  //pinMode(BTN_GO,OUTPUT);
-
-  pinMode(BTN_LEFT,INPUT);
-  btnState_left = !digitalRead(BTN_LEFT);
-  pinMode(BTN_LEFT,OUTPUT);
-
-  pinMode(BTN_RIGHT,INPUT);
-  btnState_right = !digitalRead(BTN_RIGHT);
-  pinMode(BTN_RIGHT,OUTPUT);
-
-  digitalWrite(LED_RED, !redLED_cp&0x01);
-  digitalWrite(LED_GREEN, !greenLED_cp&0x01);
-  digitalWrite(LED_BLUE, !blueLED_cp&0x01);
-
-  if (index == 8){
-    index = 1;
-    redLED_cp   = redLED;
-    greenLED_cp = greenLED;
-    blueLED_cp  = blueLED;
-  }
-  else{
-    redLED_cp    = redLED_cp   >>1;
-    greenLED_cp  = greenLED_cp >>1;
-    blueLED_cp   = blueLED_cp  >>1;
-    index ++;
-  }
-	return (currentTime + CORE_TICK_RATE*3);
-}
-
-#endif
 
 bool EVShield::getButtonState(uint8_t btn) {
   uint8_t bVal;

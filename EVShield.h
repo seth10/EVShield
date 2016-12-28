@@ -278,10 +278,6 @@ typedef enum {
 #define SH_S2   2
 
 #include "EVShieldI2C.h"
-#if defined(__AVR__)
-  #include <avr/io.h>
-  #include <avr/interrupt.h>
-#endif
 
 /**
   @brief This class defines methods for the EVShield Bank(s).

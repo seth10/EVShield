@@ -1,10 +1,6 @@
 #ifndef MsTimer2_h
 #define MsTimer2_h
 
-#if defined(__AVR__)
-  #include <avr/interrupt.h>
-#endif
-
 namespace MsTimer2 {
 	extern unsigned long msecs;
 	extern void (*func)();
