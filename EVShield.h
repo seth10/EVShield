@@ -713,20 +713,18 @@ public:
 
   
   /**
-  Get the button state of the specific button on EVShield.
-  @param btn      Button to get state for (BTN_GO, BTN_LEFT, BTN_RIGHT)
-  @return true or false for specified button on the EVShield 
+  Check if the GO button is pressed.
+  @return true or false for whether or not the Go button is pressed
   */
-  bool getButtonState(uint8_t btn);
+  bool isKeyPressed();
   
   /** 
-  Wait inside function until specified button is pressed on EVShield (BTN_GO, BTN_LEFT, BTN_RIGHT)
-  @param btn      Button to get state for (BTN_GO, BTN_LEFT, BTN_RIGHT)
+  Wait inside function until GO button is pressed on PiStorms
   @param led_pattern   0 for LED off.
   1 to brighten/lighten LED with breathing pattern (default).
   2 to brighten/lighten LED with heart beat pattern.
   */
-  void waitForButtonPress(uint8_t btn, uint8_t led_pattern=1);
+  void waitForButtonPress(uint8_t led_pattern=1);
   
 
   /**

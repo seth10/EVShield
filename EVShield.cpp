@@ -106,6 +106,7 @@ void EVShield::initProtocols(SH_Protocols protocol)
         Serial.println("If you are trying to use an NXShield, please use the NXShield library from sourceforge.net/projects/nxshield");
       }
       pinMode(13, OUTPUT);
+      // WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
       while (true) { // stop here with red blinking light.
         ledSetRGB(100, 0, 0);
         digitalWrite(13, HIGH);
@@ -427,6 +428,7 @@ uint8_t EVShieldBank::motorIsTimeDone(SH_Motor which_motors)
 
 }
 
+// WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
 // waited until a timed command finishes
 uint8_t EVShieldBank::motorWaitUntilTimeDone(SH_Motor which_motors)
 {
@@ -471,6 +473,7 @@ uint8_t EVShieldBank::motorIsTachoDone(SH_Motor which_motors)
   }
 }
 
+// WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
 // waited until a turn-by-degrees command ends
 uint8_t EVShieldBank::motorWaitUntilTachoDone(SH_Motor which_motors)
 {
@@ -569,7 +572,6 @@ uint8_t EVShieldBank::motorRunTachometer(
 
   if (wait_for_completion == SH_Completion_Wait_For)
   {
-    //delay(50);
     s = motorWaitUntilTachoDone(which_motors);
   }
   return s;
@@ -710,15 +712,16 @@ void pingEV(void *pArg)
   Wire.endTransmission();
 }
 
-bool EVShield::getButtonState(uint8_t btn) {
+bool EVShield::isKeyPressed() {
   uint8_t bVal;
   bVal = bank_a.readByte(SH_BTN_PRESS);
 
-  return (bVal == btn);
+  return (bVal == 1);
 }
 
-void EVShield::waitForButtonPress(uint8_t btn, uint8_t led_pattern) {
-  while(!getButtonState(btn)){
+// WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
+void EVShield::waitForButtonPress(uint8_t led_pattern) {
+  while(!isKeyPressed()){
       switch (led_pattern) {
         case 1:
           ledBreathingPattern();
@@ -734,6 +737,7 @@ void EVShield::waitForButtonPress(uint8_t btn, uint8_t led_pattern) {
   if (led_pattern != 0) ledSetRGB(0,0,0);
 }
 
+// WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
 void EVShield::ledBreathingPattern() {
     static int breathNow = 0;
     int i;
@@ -761,11 +765,10 @@ void EVShield::ledBreathingPattern() {
 void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
 {
   bank_a.ledSetRGB(red,green,blue);
-  //delay(100);
   bank_b.ledSetRGB(red,green,blue);
-  //delay(100);
 }
 
+// WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
 void EVShield::ledHeartBeatPattern() {
   static int breathNow = 0;
   int i;

@@ -45,20 +45,4 @@ typedef enum {
   SH_SoftwareI2C,  /*!< Software I2C is slower, and designed to work with Ultrasonic sensor.  */
 } SH_Protocols;
 
-#define SCL_BAS1  21
-#define SDA_BAS1  20
-#define SCL_BAS2  19
-#define SDA_BAS2  A13
-#define SCL_BBS1  17
-#define SDA_BBS1  A14
-#define SCL_BBS2  18
-#define SDA_BBS2  A15
-
-#define BTN_LEFT  16
-#define BTN_GO  1
-#define BTN_RIGHT 14
-#define LED_RED  16
-#define LED_GREEN  15
-#define LED_BLUE  14
-
 #endif
