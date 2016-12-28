@@ -21,7 +21,6 @@
 */
 
 #include "BaseI2CDevice.h"
-#include "MsTimer2.h"
 #include <Wire.h>
 
 // Max I2C message length is 16 bytes.  
@@ -66,7 +65,6 @@ uint8_t* BaseI2CDevice::readRegisters(
   uint8_t  buffer_length,    // (optional) length of user-supplied buffer
   bool     clear_buffer)    // should we zero out the buffer first? (optional)
 {
-  MsTimer2::reset();
   if (!buffer)
   {
     buffer = _buffer;
@@ -99,7 +97,6 @@ uint8_t* BaseI2CDevice::readRegisters(
 
   _write_error_code = Wire.endTransmission();
 
-  MsTimer2::reset();
   return buffer;
 }
 
@@ -147,7 +144,6 @@ bool BaseI2CDevice::writeRegisters(
   uint8_t  bytes_to_write,   // number of bytes to write
   uint8_t* buffer)    // optional user-supplied buffer
 {
-  MsTimer2::reset();
   if (!buffer)
   {
     buffer = _buffer;
@@ -165,7 +161,6 @@ bool BaseI2CDevice::writeRegisters(
 
   _write_error_code = Wire.endTransmission();
 
-  MsTimer2::reset();
   return _write_error_code == 0;  // 0 indicates success
 }
 

@@ -20,8 +20,13 @@
 
 #include "EVShield.h"
 #include "Wire.h"
-#include "MsTimer2.h"
-static void pingEV();
+static void pingEV(void *pArg);
+
+extern "C" {
+#include "user_interface.h" # for NodeMCU with ESP2866 timer
+}
+
+os_timer_t pingEVtimer;
 
 byte initCounter = 0;
 bool btnState_go, btnState_left, btnState_right;
@@ -117,8 +122,8 @@ void EVShield::initProtocols(SH_Protocols protocol)
 
 void EVShield::I2CTimer()
 {
-  MsTimer2::set(300, pingEV); // 300ms period
-  MsTimer2::start(); 
+  os_timer_setfn(&pingEVtimer, pingEV, NULL);
+  os_timer_arm(&pingEVtimer, 300, true); // 300ms period, true to repeat
 }
 
 EVShieldBankB::EVShieldBankB(uint8_t i2c_address)
@@ -699,7 +704,7 @@ int EVShieldBankB::sensorReadRaw(uint8_t which_sensor)
   }
 }
 
-void pingEV()
+void pingEV(void *pArg)
 {
   Wire.beginTransmission(0x34);
   Wire.endTransmission();
