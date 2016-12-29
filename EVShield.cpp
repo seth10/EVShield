@@ -49,12 +49,10 @@ bool format_bin(uint8_t i, char *s)
 
 
 EVShield::EVShield(uint8_t i2c_address_a, uint8_t i2c_address_b)
+: screen((void *) this, (SH_BankPort)-1)
 {
   if ( i2c_address_a != SH_Bank_A) bank_a.setAddress(i2c_address_a);
   if ( i2c_address_b != SH_Bank_B) bank_b.setAddress(i2c_address_b);
-  
-  // initializing the screen makes more sense in the constructor than initProtocols, even though it's initializing EVShieldI2C?
-  screen.initI2C((void *) this, (SH_BankPort)-1);
 }
 
 void EVShield::init(SH_Protocols protocol)
