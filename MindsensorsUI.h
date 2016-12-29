@@ -41,9 +41,11 @@
   */
 class MindsensorsUI {
 
+public:
+  Adafruit_ILI9341 tft;
+
 private:
   EVShieldI2C i2c;
-  Adafruit_ILI9341 tft;
   
   /** touchscreen configuration values */
   uint16_t x1, y1, x2, y2, x3, y3, x4, y4;
@@ -82,33 +84,13 @@ public:
   /** detect touchscreen presses and prevents false positives */
   bool isTouched();
   
-  /** clear the LCD screen to defualt black */
   void clearScreen();
   
-  /** asdf */
   void fillScreen(uint16_t color);
   
-  // old MindsensorsUI functions:
-  //void fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t fill);
-  //void fillBmp(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const char *path);
-  //void fillImgArray(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint8_t *image);
-  //void rotateRight();
-  //void rotateLeft();
-  //void drawAutoText(const char *text, uint16_t x, uint16_t y, uint16_t fill, uint8_t size, bool align);
-  //void termGotoLine(uint8_t lineno);
-  //void termPrintAt(uint8_t lineno, const char *text);
-  //void termPrint(const char *text);
-  //void termPrintln(const char *text);
-  //void termReplaceLastLine(const char *text);
-  //void refreshLine(uint8_t lineNum);
-  //void drawButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const char *prefix, const char *text, bool align);
-  //void refresh();
-  //void checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
-  //void askQuestion();
-  //void askYesOrNoQuestion();
-  //void showMessage();
-  //void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t width, uint16_t fill);
-  //void drawPolyLine();
+  void fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color);
+  
+  bool checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 
 };
 

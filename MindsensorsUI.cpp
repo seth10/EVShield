@@ -174,6 +174,27 @@ void MindsensorsUI::clearScreen()
   fillScreen(ILI9341_BLACK);
 }
 
-void MindsensorsUI::fillScreen(uint16_t color) {
+void MindsensorsUI::fillScreen(uint16_t color)
+{
   tft.fillScreen(color);
+}
+
+void MindsensorsUI::fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
+{
+  tft.fillRect(x, y, width, height, color);
+}
+
+bool MindsensorsUI::checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+{
+  uint16_t tsx, tsy; // touch screen x, touch screen y
+  getTouchscreenValues(&tsx, &tsy);
+  
+  if (tsx==0 && tsy==0)
+  {
+    return false;
+  }
+  
+  // 0,0 is top-left corner
+  // if left of right edge, right of left edge, above bottom edge, and below top edge
+  return tsx<=x+width && tsx>=x && tsy<=y+height && tsy>=y;
 }
