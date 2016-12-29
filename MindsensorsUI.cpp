@@ -31,7 +31,9 @@ MindsensorsUI::MindsensorsUI(void * shield, SH_BankPort bp)
 , tft(D1,D4)
 , tolerance(5)
 {
-  i2c.init(shield, bp); // init i2c
+  i2c.init(shield, bp);
+  
+  tft.begin();
   
   // read touchscreen calibration values from PiStorms
   
@@ -158,4 +160,20 @@ uint16_t MindsensorsUI::TS_Y()
   uint16_t x, y;
   getTouchscreenValues(&x, &y);
   return y;
+}
+
+bool MindsensorsUI::isTouched()
+{
+  uint16_t x, y;
+  getTouchscreenValues(&x, &y);
+  return !(x==0 && y==0);
+}
+
+void MindsensorsUI::clearScreen()
+{
+  fillScreen(ILI9341_BLACK);
+}
+
+void MindsensorsUI::fillScreen(uint16_t color) {
+  tft.fillScreen(color);
 }

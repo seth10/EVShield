@@ -78,6 +78,37 @@ public:
   
   /** reads the y-coordinate of the touchscreen press */
   uint16_t TS_Y();
+  
+  /** detect touchscreen presses and prevents false positives */
+  bool isTouched();
+  
+  /** clear the LCD screen to defualt black */
+  void clearScreen();
+  
+  /** asdf */
+  void fillScreen(uint16_t color);
+  
+  // old MindsensorsUI functions:
+  //void fillCircle(uint16_t x, uint16_t y, uint16_t radius, uint16_t fill);
+  //void fillBmp(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const char *path);
+  //void fillImgArray(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const uint8_t *image);
+  //void rotateRight();
+  //void rotateLeft();
+  //void drawAutoText(const char *text, uint16_t x, uint16_t y, uint16_t fill, uint8_t size, bool align);
+  //void termGotoLine(uint8_t lineno);
+  //void termPrintAt(uint8_t lineno, const char *text);
+  //void termPrint(const char *text);
+  //void termPrintln(const char *text);
+  //void termReplaceLastLine(const char *text);
+  //void refreshLine(uint8_t lineNum);
+  //void drawButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height, const char *prefix, const char *text, bool align);
+  //void refresh();
+  //void checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+  //void askQuestion();
+  //void askYesOrNoQuestion();
+  //void showMessage();
+  //void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t width, uint16_t fill);
+  //void drawPolyLine();
 
 };
 
