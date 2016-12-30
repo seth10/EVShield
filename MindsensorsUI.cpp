@@ -35,6 +35,8 @@ MindsensorsUI::MindsensorsUI(void * shield, SH_BankPort bp)
   
   Adafruit_ILI9341::begin();
   Adafruit_ILI9341::setRotation(3);
+  Adafruit_ILI9341::setTextSize(2);
+  Adafruit_ILI9341::setTextColor(ILI9341_WHITE, ILI9341_BLACK); // white text with a black bacground
   
   // read touchscreen calibration values from PiStorms
   
@@ -188,4 +190,10 @@ bool MindsensorsUI::checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t
   // 0,0 is top-left corner
   // if left of right edge, right of left edge, above bottom edge, and below top edge
   return tsx<=x+width && tsx>=x && tsy<=y+height && tsy>=y;
+}
+
+size_t MindsensorsUI::println(const char str[]) {
+    if (getCursorY() >= height())
+        setCursor(0,0);
+    Adafruit_ILI9341::println(str);
 }

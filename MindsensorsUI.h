@@ -91,6 +91,7 @@ public:
   
   void clearScreen();
   
+  size_t println(const char[]);
 
 };
 
