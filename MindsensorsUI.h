@@ -37,12 +37,15 @@
 
 
 /**
-  @brief This class provides basic functions for the PiStorms hardware touchscreen LCD
+  @brief This class provides basic functions for the PiStorms hardware touchscreen LCD.
+  
+  MindsensorsUI inherits most all of its drawing functions from the Adafruit GFX library
+  (through Adafruit_ILI9341). The primary purpose of this class is to add touchscreen
+  functionality. It will load the touchscreen configuration values from the device
+  and use those to calculate touch points.
   */
-class MindsensorsUI {
-
-public:
-  Adafruit_ILI9341 tft;
+class MindsensorsUI : public Adafruit_ILI9341
+{
 
 private:
   EVShieldI2C i2c;
@@ -84,13 +87,10 @@ public:
   /** detect touchscreen presses and prevents false positives */
   bool isTouched();
   
+  bool checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+  
   void clearScreen();
   
-  void fillScreen(uint16_t color);
-  
-  void fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color);
-  
-  bool checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
 
 };
 

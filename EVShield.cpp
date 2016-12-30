@@ -53,8 +53,6 @@ EVShield::EVShield(uint8_t i2c_address_a, uint8_t i2c_address_b)
 {
   if ( i2c_address_a != SH_Bank_A) bank_a.setAddress(i2c_address_a);
   if ( i2c_address_b != SH_Bank_B) bank_b.setAddress(i2c_address_b);
-  
-  screen.tft.setRotation(3); // no wrapper function, calling directly on underlying Adafruit_ILI9341 object
 }
 
 void EVShield::init(SH_Protocols protocol)

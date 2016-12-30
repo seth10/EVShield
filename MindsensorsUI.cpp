@@ -27,13 +27,14 @@
 
 // Constructor, needs these parameters to initialize I2C
 MindsensorsUI::MindsensorsUI(void * shield, SH_BankPort bp)
-: i2c(SH_Bank_A)
-, tft(D1,D4)
+: Adafruit_ILI9341(D1,D4)
+, i2c(SH_Bank_A)
 , tolerance(5)
 {
   i2c.init(shield, bp);
   
-  tft.begin();
+  Adafruit_ILI9341::begin();
+  Adafruit_ILI9341::setRotation(3);
   
   // read touchscreen calibration values from PiStorms
   
@@ -171,17 +172,7 @@ bool MindsensorsUI::isTouched()
 
 void MindsensorsUI::clearScreen()
 {
-  fillScreen(ILI9341_BLACK);
-}
-
-void MindsensorsUI::fillScreen(uint16_t color)
-{
-  tft.fillScreen(color);
-}
-
-void MindsensorsUI::fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint16_t color)
-{
-  tft.fillRect(x, y, width, height, color);
+  Adafruit_ILI9341::fillScreen(ILI9341_BLACK);
 }
 
 bool MindsensorsUI::checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
