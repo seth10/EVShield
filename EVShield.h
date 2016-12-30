@@ -434,10 +434,7 @@ public:
   */
   bool     motorSetSpeedPID(uint16_t Kp, uint16_t Ki, uint16_t Kd);
   
-  bool centerLedSetRGB(uint8_t R, uint8_t G, uint8_t B);
-
   // Set the RGBLED that shows RGB color
-
   bool    ledSetRGB(uint8_t R, uint8_t G, uint8_t B);
   
   /** 
@@ -699,11 +696,6 @@ public:
   @param protocol optional, specify the i2c protocol to use for the EVShield and highspeed i2c port
   */
   void init(SH_Protocols protocol=SH_HardwareI2C);
-
-  /**
-  the initialization of the EVShield LED timers.
-  */
-	void initLEDTimers();
 
   /**
     the initialization of the EVShield I2C timer.
