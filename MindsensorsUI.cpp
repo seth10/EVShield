@@ -192,8 +192,15 @@ bool MindsensorsUI::checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t
   return tsx<=x+width && tsx>=x && tsy<=y+height && tsy>=y;
 }
 
-size_t MindsensorsUI::println(const char str[]) {
-    if (getCursorY() >= height())
-        setCursor(0,0);
-    Adafruit_ILI9341::println(str);
+size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
+  if (getCursorY() >= height())
+    setCursor(0,0);
+  
+  if (mirrorWriteToSerial && Serial)
+    Serial.write(buffer, size);
+  Print::write(buffer, size);
+}
+
+void MindsensorsUI::writeMirrorToSerial(bool enable) {
+  mirrorWriteToSerial = enable; // note naming difference between variable and method
 }

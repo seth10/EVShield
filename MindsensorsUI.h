@@ -37,7 +37,7 @@
 
 
 /**
-  @brief This class provides basic functions for the PiStorms hardware touchscreen LCD.
+  @brief This class provides basic functions for the PiStorms touchscreen.
   
   MindsensorsUI inherits most all of its drawing functions from the Adafruit GFX library
   (through Adafruit_ILI9341). The primary purpose of this class is to add touchscreen
@@ -90,8 +90,16 @@ public:
   bool checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
   
   void clearScreen();
-  
-  size_t println(const char[]);
+
+private:
+  bool mirrorWriteToSerial = true;
+public:
+  /** By default any calls to print or println will display on the 
+    PiStorms touchscreen and the Serial Monitor. Use this method to change this behavior.
+    True will print to both, false will print only to the touchscreen.
+  */
+  void writeMirrorToSerial(bool enable = true);
+  size_t write(const uint8_t *buffer, size_t size);
 
 };
 
