@@ -193,7 +193,11 @@ bool MindsensorsUI::checkButton(uint16_t x, uint16_t y, uint16_t width, uint16_t
 }
 
 size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
-  if (getCursorY() >= height())
+  int16_t x1, y1;
+  uint16_t w, h;
+  getTextBounds((char*)buffer, getCursorX(), getCursorY(), &x1, &y1, &w, &h);
+  
+  if (y1+h >= height())
     setCursor(0,0);
   
   if (mirrorWriteToSerial && Serial)
