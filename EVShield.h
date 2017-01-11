@@ -116,7 +116,6 @@
 
 #define SH_BTN_PRESS     0xDA
 #define SH_RGB_LED     0xD7
-#define SH_CENTER_RGB_LED     0xDE
 
 /* constants to be used by user programs */
 /**
