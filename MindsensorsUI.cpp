@@ -113,11 +113,11 @@ void MindsensorsUI::getReading(uint16_t *retx, uint16_t *rety) // returnX, retur
   }
   
   // http://math.stackexchange.com/a/104595/363240
-  uint16_t dU0 = 1.0 * distanceToLine(x, y, x1, y1, x2, y2) / (y2-y1) * 320;
-  uint16_t dV0 = 1.0 * distanceToLine(x, y, x1, y1, x4, y4) / (x4-x1) * 240;
+  uint16_t dU0 = distanceToLine(x, y, x1, y1, x2, y2) / (y2-y1) * 320;
+  uint16_t dV0 = distanceToLine(x, y, x1, y1, x4, y4) / (x4-x1) * 240;
 
-  uint16_t dU1 = 1.0 * distanceToLine(x, y, x4, y4, x3, y3) / (y3-y4) * 320;
-  uint16_t dV1 = 1.0 * distanceToLine(x, y, x2, y2, x3, y3) / (x3-x2) * 240;
+  uint16_t dU1 = distanceToLine(x, y, x4, y4, x3, y3) / (y3-y4) * 320;
+  uint16_t dV1 = distanceToLine(x, y, x2, y2, x3, y3) / (x3-x2) * 240;
   
   // careful not to divide by 0
   if ( dU0+dU1 == 0 \

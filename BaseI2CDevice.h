@@ -75,15 +75,15 @@ inline void writeIntToBuffer(uint8_t* buf, int16_t data)
 }
 
 /** write the four byte integer of type long to the supplied buffer */
-/*inline void writeLongToBuffer(uint8_t* buf, uint32_t data)
+inline void writeLongToBuffer(uint8_t* buf, uint32_t data)
 {
 	buf[0] = data & 0xFF;
 	buf[1] = (data >>  8) & 0xFF;
 	buf[2] = (data >> 16) & 0xFF;
 	buf[3] = (data >> 24) & 0xFF;
-}*/
+}
 
-inline void writeLongToBuffer(uint8_t* buf, int32_t data)
+inline void writeLongToBuffer(uint8_t* buf, long data)
 {
 	writeLongToBuffer(buf, (uint32_t)data);
 }
