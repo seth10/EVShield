@@ -58,10 +58,10 @@ void setup() {
     ev.screen.setTextSize(2); // default (1 is very small)
     // prepend a newline to put some space between the title and this text
     // this text will automatically be wrapped to the next line on screen
-    ev.screen.println("\nAttach a touch sensor to  BAS1 and press to begin.");
+    ev.screen.println("\nAttach a touch sensor to BAS1 and press to begin.");
     waitForPress();
     
-    ev.screen.println("\nWait for the red box to   appear, then press!");
+    ev.screen.println("\nWait for the red box to appear, then press!");
     waitForPress();
     
     ev.screen.clearScreen();
