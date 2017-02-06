@@ -83,7 +83,7 @@ inline void writeLongToBuffer(uint8_t* buf, uint32_t data)
 	buf[3] = (data >> 24) & 0xFF;
 }
 
-inline void writeLongToBuffer(uint8_t* buf, long data)
+inline void writeLongToBuffer(uint8_t* buf, int32_t data)
 {
 	writeLongToBuffer(buf, (uint32_t)data);
 }
