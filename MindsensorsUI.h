@@ -96,13 +96,13 @@ public:
   void clearScreen();
 
 private:
-  bool mirrorWriteToSerial = true;
+  bool mirrorWriteToSerialEnabled = true;
 public:
   /** By default any calls to print or println will display on the 
     PiStorms touchscreen and the Serial Monitor. Use this method to change this behavior.
     True will print to both, false will print only to the touchscreen.
   */
-  void writeMirrorToSerial(bool enable = true);
+  void mirrorWriteToSerial(bool enable = true);
   size_t write(const uint8_t *buffer, size_t size);
 
 };
