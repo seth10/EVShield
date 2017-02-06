@@ -7,9 +7,14 @@ const long maxTime = 5000;
 EVShield ev;
 EVs_NXTTouch touch;
 
-void waitForPress() {
-    while (!touch.isPressed()) delay(10); // wait until the touch sensor is pressed
-    while (touch.isPressed()) delay(10); // wait until it is released
+void waitForPress(bool reversed = false) {
+    if (!reversed) {
+        while (!touch.isPressed()) delay(10); // wait until the touch sensor is pressed
+        while (touch.isPressed()) delay(10); // wait until it is released
+    } else {
+        while (touch.isPressed()) delay(10); // wait until it is released
+        while (!touch.isPressed()) delay(10); // wait until the touch sensor is pressed
+    }
 }
 
 void setup() {
@@ -26,7 +31,7 @@ void setup() {
     ev.screen.println("\nAttach a touch sensor to  BAS1 and press to begin.");
     waitForPress();
     
-    ev.screen.println("\nWait for the screen to turn red, then press!");
+    ev.screen.println("\nWait for the red box to   appear, then press!");
     waitForPress();
     
     ev.screen.clearScreen();
@@ -40,8 +45,7 @@ void loop() {
     ev.screen.fillRect(120, 90, 80, 60, ILI9341_RED);
     
     long start = millis();
-    while (touch.isPressed()) delay(10); // make sure you can't just holding it down
-    while (!touch.isPressed()) delay(10);
+    waitForPress(true); // make sure you can't just holding it down
     long end = millis();
     
     ev.screen.setCursor(0,0);
@@ -49,6 +53,7 @@ void loop() {
     ev.screen.print(end - start);
     ev.screen.println(" ms!");
     
-    waitForPress();
+    // you were already holding the button down, wait for you to release it first
+    waitForPress(true);
     ev.screen.clearScreen();
 }
