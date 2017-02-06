@@ -70,13 +70,18 @@ void loop() {
     
     // the button is already held down, wait for it to be released first
     while (touch.isPressed()) delay(10); // wait until it is released
+    delay(1000);
+    long blinkTime = millis();
     while (!touch.isPressed()) { // flash LEDs until it is pressed to continue
-        ev.bank_a.ledSetRGB(255,0,0);
-        ev.bank_b.ledSetRGB(0,255,0);
-        delay(400);
-        ev.bank_a.ledSetRGB(0,255,0);
-        ev.bank_b.ledSetRGB(255,0,0);
-        delay(400);
+        if (millis()-blinkTime < 300) {
+            ev.bank_a.ledSetRGB(255,0,0);
+            ev.bank_b.ledSetRGB(0,255,0);
+        } else if (millis()-blinkTime < 600) {
+            ev.bank_a.ledSetRGB(0,255,0);
+            ev.bank_b.ledSetRGB(255,0,0);
+        } else {
+            blinkTime = millis();
+        }
     }
     
     ev.ledSetRGB(0,0,0); // turn off both LEDs
