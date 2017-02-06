@@ -32,6 +32,7 @@ void waitForPress(bool reversed = false) {
 void setup() {
     ev.init();
     touch.init(&ev, SH_BAS1);
+    ev.ledSetRGB(0,0,0); // turn off both LEDs
     randomSeed(analogRead(0));
     
     ev.screen.setTextSize(4); // large for title
@@ -68,7 +69,17 @@ void loop() {
     ev.screen.println(" ms!");
     
     // the button is already held down, wait for it to be released first
-    waitForPress(true);
+    while (touch.isPressed()) delay(10); // wait until it is released
+    while (!touch.isPressed()) { // flash LEDs until it is pressed to continue
+        ev.bank_a.ledSetRGB(255,0,0);
+        ev.bank_b.ledSetRGB(0,255,0);
+        delay(400);
+        ev.bank_a.ledSetRGB(0,255,0);
+        ev.bank_b.ledSetRGB(255,0,0);
+        delay(400);
+    }
+    
+    ev.ledSetRGB(0,0,0); // turn off both LEDs
     ev.screen.clearScreen();
 }
 
