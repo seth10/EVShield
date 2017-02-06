@@ -710,14 +710,22 @@ void pingEV(void *pArg)
   Wire.endTransmission();
 }
 
-bool EVShield::isKeyPressed() {
+bool EVShield::isKeyPressed()
+{
   uint8_t bVal;
   bVal = bank_a.readByte(SH_BTN_PRESS);
 
   return (bVal == 1);
 }
 
-void EVShield::waitForButtonPress(uint8_t led_pattern) {
+void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
+{
+  bank_a.ledSetRGB(red,green,blue);
+  bank_b.ledSetRGB(red,green,blue);
+}
+
+void EVShield::waitForButtonPress(uint8_t led_pattern)
+{
   while(!isKeyPressed()){
       switch (led_pattern) {
         case 1:
@@ -734,9 +742,11 @@ void EVShield::waitForButtonPress(uint8_t led_pattern) {
   if (led_pattern != 0) ledSetRGB(0,0,0);
 }
 
-// smooth increase and decrease
 static int ledBreathingPatternTimer = 0;
-void EVShield::ledBreathingPattern() {
+// Illuminate LEDs a cyan color, smoothly increasing and decreasing intensity
+// with a 1-second period.
+void EVShield::ledBreathingPattern()
+{
     if (ledBreathingPatternTimer > 100)
         ledBreathingPatternTimer = 0;
     
@@ -751,15 +761,11 @@ void EVShield::ledBreathingPattern() {
     ledBreathingPatternTimer++;
 }
 
-void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
-{
-  bank_a.ledSetRGB(red,green,blue);
-  bank_b.ledSetRGB(red,green,blue);
-}
-
-// two fast beats and then a pause
 static int ledHeartBeatPatternTimer = 0;
-void EVShield::ledHeartBeatPattern() {
+// Illuminate LEDs a cyan color, flashing two fast beats and then a pause
+// with a 1-second total period.
+void EVShield::ledHeartBeatPattern()
+{
     if (ledHeartBeatPatternTimer > 100)
         ledHeartBeatPatternTimer = 0;
     
