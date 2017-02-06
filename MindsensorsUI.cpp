@@ -49,10 +49,10 @@ MindsensorsUI::MindsensorsUI(void * shield, SH_BankPort bp)
   unsigned long timeout = millis() + 1000; // wait for up to a second
   while (i2c.readByte(SH_PS_TS_CALIBRATION_DATA_READY) != 1) // wait for ready byte
   {
-    delay(10); // WARNING! This is BLOCKING! Background functions (keeping WiFi connected, managing TCP/IP stack, etc.) will not run in this time and the ESP8266 may crash and reset.
+    delay(10);
     if (millis() > timeout)
     {
-      break; // TODO: actual exception handling? right now the calibration just stay 0
+      break; // TODO: actual exception handling? right now the calibration just remains at 0
     }
   }
   
