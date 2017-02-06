@@ -1,3 +1,15 @@
+
+/*
+ * --- EXTENSIONS ---
+ * 1. Try using the GO button instead of a touch sensor.
+ * 2. Make it a race! Plug in two touch sensors and see whether you
+ *    or your friend has a faster reaction time. Try to show each player's time,
+ *    not just who won.
+ * 3. Use a different sensor. Maybe use a light sensor, have a color palette
+ *    on paper and use the screen show you what color to move the sensor over.
+ * 4. Keep track of high scores! Use EEPROM or SPIFFS to save the high score.
+ */
+
 #include <EVShield.h>
 #include <EVs_NXTTouch.h>
 
@@ -45,15 +57,22 @@ void loop() {
     ev.screen.fillRect(120, 90, 80, 60, ILI9341_RED);
     
     long start = millis();
-    waitForPress(true); // make sure you can't just holding it down
+    // make sure you can't just hold it down (wait for the button to be
+    // not pressed, then wait for a press)
+    waitForPress(true);
     long end = millis();
     
-    ev.screen.setCursor(0,0);
+    ev.screen.setCursor(0,0); // print the result at the top of the screen
     ev.screen.print("You reacted in ");
     ev.screen.print(end - start);
     ev.screen.println(" ms!");
     
-    // you were already holding the button down, wait for you to release it first
+    // the button is already held down, wait for it to be released first
     waitForPress(true);
     ev.screen.clearScreen();
 }
+
+/*
+ * --- HINTS ---
+ * 1. ev.screen.isKeyPressed()
+ */
