@@ -734,28 +734,21 @@ void EVShield::waitForButtonPress(uint8_t led_pattern) {
   if (led_pattern != 0) ledSetRGB(0,0,0);
 }
 
+// smooth increase and decrease
+static int ledBreathingPatternTimer = 0;
 void EVShield::ledBreathingPattern() {
-    static int breathNow = 0;
-    int i;
-
-    if ( breathNow > 800 && breathNow < 6400 ) {
-        // LED intensity rising
-        i = breathNow/800;
-        ledSetRGB(0, i, i);
-        delayMicroseconds(150);
-        if ( i == 8 ) delayMicroseconds(200);
-    } else if (breathNow > 6400 && breathNow < 13400 ) {
-        // LED intensity falling
-        i = (14400-breathNow)/1000;
-        ledSetRGB(0, i, i);
-        delayMicroseconds(200);
-        if ( i == 8 ) delayMicroseconds(200);
-    } else {
-        // LED intensity stable.
-        ledSetRGB(0,1,1);
-        delayMicroseconds(50);
-    }
-    breathNow ++;
+    if (ledBreathingPatternTimer > 100)
+        ledBreathingPatternTimer = 0;
+    
+    double intensity;
+    if (ledBreathingPatternTimer < 50)
+        intensity = ledBreathingPatternTimer/50.0; // 0.0 to 1.0
+    else
+        intensity = (100-ledBreathingPatternTimer)/50.0; // 1.0 to 0.0
+    
+    ledSetRGB(0, intensity*255, intensity*255);
+    delay(10); // 10 ms * 100 unit period = 1 second loop
+    ledBreathingPatternTimer++;
 }
 
 void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
@@ -764,26 +757,25 @@ void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
   bank_b.ledSetRGB(red,green,blue);
 }
 
+// two fast beats and then a pause
+static int ledHeartBeatPatternTimer = 0;
 void EVShield::ledHeartBeatPattern() {
-  static int breathNow = 0;
-  int i;
-
-  if ( breathNow > 800 && breathNow < 6400 ) {
-    // LED intensity rising
-    i = breathNow/800;
-    ledSetRGB(0, i, i);
-    //delayMicroseconds(150);
-    if ( i == 8 ) delayMicroseconds(200);
-  } else if (breathNow > 6400 && breathNow < 13400 ) {
-    // LED intensity falling
-    i = (14400-breathNow)/1000;
-    ledSetRGB(0, i, i);
-    //delayMicroseconds(200);
-    if ( i == 8 ) delayMicroseconds(200);
-  } else {
-    // LED intensity stable.
-    ledSetRGB(0,1,1);
-    delayMicroseconds(10);
-  }
-  breathNow ++;
+    if (ledHeartBeatPatternTimer > 100)
+        ledHeartBeatPatternTimer = 0;
+    
+    double intensity;
+    if (ledHeartBeatPatternTimer < 15)
+        intensity = ledHeartBeatPatternTimer/15.0; // 0.0 to 1.0
+    else if (ledHeartBeatPatternTimer >= 15 && ledHeartBeatPatternTimer < 30)
+        intensity = (30-ledHeartBeatPatternTimer)/15.0; // 1.0 to 0.0
+    else if (ledHeartBeatPatternTimer >= 30 && ledHeartBeatPatternTimer < 45)
+        intensity = (ledHeartBeatPatternTimer-30)/15.0; // 0.0 to 1.0
+    else if (ledHeartBeatPatternTimer >= 45 && ledHeartBeatPatternTimer < 60)
+        intensity = (60-ledHeartBeatPatternTimer)/15.0; // 1.0 to 0.0
+    else if (ledHeartBeatPatternTimer >= 60)
+        intensity = 0;
+    
+    ledSetRGB(0, intensity*255, intensity*255);
+    delay(10); // 10 ms * 100 unit period = 1 second loop
+    ledHeartBeatPatternTimer++;
 }
