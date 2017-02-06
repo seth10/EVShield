@@ -70,9 +70,8 @@ void setup() {
 void loop() {
     long waitTime = random(minTime,maxTime);
     delay(waitTime);
-    //ev.screen.fillScreen(ILI9341_RED);
-    //ev.screen.getWidth()*0.4
-    ev.screen.fillRect(120, 90, 80, 60, ILI9341_RED);
+    ev.screen.fillRect(ev.screen.width()*0.3, ev.screen.height()*0.4,
+                       ev.screen.width()*0.4, ev.screen.height()*0.2, ILI9341_RED);
     
     long start = millis();
     // make sure you can't just hold it down (wait for the button to be
