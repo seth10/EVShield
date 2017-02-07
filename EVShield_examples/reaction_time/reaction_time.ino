@@ -95,9 +95,9 @@ void loop() {
     while (touch.isPressed()) delay(10); // wait until it is released
     while (!touch.isPressed()) { // flash LEDs until it is pressed to continue
         ev.bank_a.ledSetRGB(255,0,0);
-        ev.bank_b.ledSetRGB(0,255,0);
+        ev.bank_b.ledSetRGB(0,0,255);
         delay(400);
-        ev.bank_a.ledSetRGB(0,255,0);
+        ev.bank_a.ledSetRGB(0,0,255);
         ev.bank_b.ledSetRGB(255,0,0);
         delay(400);
     }
