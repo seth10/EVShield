@@ -68,14 +68,21 @@ void setup() {
 }
 
 void loop() {
-    long waitTime = random(minTime,maxTime);
-    delay(waitTime);
+    do {
+        long waitTime = random(minTime,maxTime);
+        delay(waitTime);
+    } while (touch.isPressed());
+    // if the button is being held (cheating) don't show the red rectangle
+    // but instead wait for another random period
+    // this is a do-while loop so there will be at least one round of random delay
+    
     ev.screen.fillRect(ev.screen.width()*0.3, ev.screen.height()*0.4,
                        ev.screen.width()*0.4, ev.screen.height()*0.2, ILI9341_RED);
     
     long start = millis();
-    // make sure you can't just hold it down (wait for the button to be
-    // not pressed, then wait for a press)
+    // here we use the argument true to flip the order it checks,
+    // so it doesn't wait for the button to be released,
+    // it record the time as soon as the button is pressed down
     waitForPress(true);
     long end = millis();
     
