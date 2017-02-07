@@ -243,13 +243,18 @@ size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
       char *str = (char *)malloc(size);
       memcpy(str, buffer, size);
       
-      uint16_t lastSpace = 0, curX = 0;
-      uint16_t maxWidth = width()/singleCharacterWidth;
+      bool hasThereBeenASpaceOnThisLine = false;
+      uint16_t curX = getCursorX(),
+               maxWidth = width(),
+               lastSpace = 0;
       for (int i = 0; i < size; i++) {
-        curX++;
-        if (str[i] == ' ') lastSpace = i;
+        curX += singleCharacterWidth;
+        if (str[i] == ' ') {
+          lastSpace = i;
+          hasThereBeenASpaceOnThisLine = true;
+        }
         if (curX > maxWidth) {
-          if (lastSpace == i - maxWidth) {
+          if (!hasThereBeenASpaceOnThisLine) {
             lastSpace = i;
           } else {
             str[lastSpace] = '\n';
@@ -257,6 +262,7 @@ size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
             lastSpace = i+1;
           }
           curX = 0;
+          hasThereBeenASpaceOnThisLine = false;
         }
       }
       
