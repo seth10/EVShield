@@ -255,14 +255,6 @@ size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
         if (curX > maxWidth) { // if printing this character would make it chopped off
           if (str[i] == ' ') { // if this is a space
             str[i] = '\n'; // make it a newline
-            if (i+1 < size && str[i+1] == ' ') { // if there are more spaces directly after this one
-              int j = i+1; // start at that next space
-              while (str[j] == ' ') { // this character is a space
-                str[j] = '\0'; // don't print this space
-                j++; // move to look at next character
-              }
-              i = j-1; // j is now the first character after the span of spaces, the next iteration of the for loop will increment i and be at this first new character
-            }
           } else { // this is a character
             if (!thereHasBeenASpaceOnThisLine) { // there haven't been any spaces on this line, this is a super long word
               ; // do nothing, default adafruit gfx text wrapping will work, and manually inserting a newline character here would be a pain  
