@@ -252,7 +252,7 @@ size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
       int indexOfLastSpace = 0;
       for (int i = 0; i < size; i++) {
         curX += singleCharacterWidth;
-        if (curX > maxWidth) { // if printing this character would make it chopped off
+        if (curX >= maxWidth) { // if printing this character would make it chopped off
           if (str[i] == ' ') { // if this is a space
             str[i] = '\n'; // make it a newline
           } else { // this is a character
