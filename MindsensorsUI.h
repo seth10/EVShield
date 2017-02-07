@@ -97,12 +97,20 @@ public:
 
 private:
   bool mirrorWriteToSerialEnabled = true;
+  bool smartLineWrappingEnabled = true;
+
 public:
   /** By default any calls to print or println will display on the 
     PiStorms touchscreen and the Serial Monitor. Use this method to change this behavior.
     True will print to both, false will print only to the touchscreen.
   */
   void mirrorWriteToSerial(bool enable = true);
+  
+  /** By default text will be wrapped by word when printed to the display.
+    Use this method to enable or disable this functionality.
+  */
+  void smartLineWrapping(bool enable = true);
+  
   size_t write(const uint8_t *buffer, size_t size);
 
 };

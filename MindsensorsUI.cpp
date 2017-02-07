@@ -232,38 +232,46 @@ size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
   if (mirrorWriteToSerialEnabled && Serial)
     Serial.write(buffer, size);
   
-  int16_t x1, y1;
-  uint16_t w, h;
-  getTextBounds("a", getCursorX(), getCursorY(), &x1, &y1, &w, &h);
-  uint16_t singleCharacterWidth = w+1;
-  
-  char *str = (char *)malloc(size);
-  memcpy(str, buffer, size);
-  
-  uint16_t lastSpace = 0, curX = 0;
-  uint16_t maxWidth = width()/singleCharacterWidth;
-  for (int i = 0; i < size; i++) {
-    curX++;
-    if (str[i] == ' ') lastSpace = i;
-    if (curX > maxWidth) {
-      if (lastSpace == i - maxWidth) {
-        lastSpace = i;
-      } else {
-        str[lastSpace] = '\n';
-        i = lastSpace;
-        lastSpace = i+1;
+  if (!smartLineWrappingEnabled) {
+      Print::write(buffer, size);
+  } else {
+      int16_t x1, y1;
+      uint16_t w, h;
+      getTextBounds("a", getCursorX(), getCursorY(), &x1, &y1, &w, &h);
+      uint16_t singleCharacterWidth = w+1;
+      
+      char *str = (char *)malloc(size);
+      memcpy(str, buffer, size);
+      
+      uint16_t lastSpace = 0, curX = 0;
+      uint16_t maxWidth = width()/singleCharacterWidth;
+      for (int i = 0; i < size; i++) {
+        curX++;
+        if (str[i] == ' ') lastSpace = i;
+        if (curX > maxWidth) {
+          if (lastSpace == i - maxWidth) {
+            lastSpace = i;
+          } else {
+            str[lastSpace] = '\n';
+            i = lastSpace;
+            lastSpace = i+1;
+          }
+          curX = 0;
+        }
       }
-      curX = 0;
-    }
+      
+      getTextBounds(str, getCursorX(), getCursorY(), &x1, &y1, &w, &h);
+      if (y1+h >= height())
+        setCursor(0,0);
+      
+      Print::write((const uint8_t *)str, size);
   }
-  
-  getTextBounds(str, getCursorX(), getCursorY(), &x1, &y1, &w, &h);
-  if (y1+h >= height())
-    setCursor(0,0);
-  
-  Print::write((const uint8_t *)str, size);
 }
 
 void MindsensorsUI::mirrorWriteToSerial(bool enabled) {
   mirrorWriteToSerialEnabled = enabled;
+}
+
+void MindsensorsUI::smartLineWrapping(bool enabled) {
+  smartLineWrappingEnabled = enabled;
 }
