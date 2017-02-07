@@ -68,13 +68,12 @@ void setup() {
 }
 
 void loop() {
-    do {
-        long waitTime = random(minTime,maxTime);
-        delay(waitTime);
-    } while (touch.isPressed());
-    // if the button is being held (cheating) don't show the red rectangle
-    // but instead wait for another random period
-    // this is a do-while loop so there will be at least one round of random delay
+    long timeout = millis() + random(minTime,maxTime);
+    while (millis() < timeout) {
+        if (touch.isPressed()) // cheating
+            timeout = millis() + random(minTime,maxTime);
+        delay(1);
+    }
     
     ev.screen.fillRect(ev.screen.width()*0.3, ev.screen.height()*0.4,
                        ev.screen.width()*0.4, ev.screen.height()*0.2, ILI9341_RED);
@@ -92,14 +91,17 @@ void loop() {
     ev.screen.println(" ms!");
     
     // the button is already held down, wait for it to be released first
-    while (touch.isPressed()) delay(10); // wait until it is released
-    while (!touch.isPressed()) { // flash LEDs until it is pressed to continue
-        ev.bank_a.ledSetRGB(255,0,0);
-        ev.bank_b.ledSetRGB(0,0,255);
-        delay(400);
-        ev.bank_a.ledSetRGB(0,0,255);
-        ev.bank_b.ledSetRGB(255,0,0);
-        delay(400);
+    while (touch.isPressed()) delay(50);
+    // now flash the LEDs until it is pressed to continue
+    while (!touch.isPressed()) {
+        if (millis()%800 < 400) {
+            ev.bank_a.ledSetRGB(255,0,0);
+            ev.bank_b.ledSetRGB(0,0,255);
+        } else {
+            ev.bank_a.ledSetRGB(0,0,255);
+            ev.bank_b.ledSetRGB(255,0,0);
+        }
+        delay(50);
     }
     
     ev.ledSetRGB(0,0,0); // turn off both LEDs
