@@ -243,26 +243,39 @@ size_t MindsensorsUI::write(const uint8_t *buffer, size_t size) {
       char *str = (char *)malloc(size);
       memcpy(str, buffer, size);
       
-      bool hasThereBeenASpaceOnThisLine = false;
-      uint16_t curX = getCursorX(),
-               maxWidth = width(),
-               lastSpace = 0;
+      const uint16_t maxWidth = width();
+    //const uint16_t singleCharacterWidth // declared and assigned above
+                     
+      uint16_t curX = getCursorX();
+      bool thereHasBeenASpaceOnThisLine = false;
+      bool thereHasBeenASecondSpace = false;
+      int indexOfLastSpace = 0;
       for (int i = 0; i < size; i++) {
         curX += singleCharacterWidth;
-        if (str[i] == ' ') {
-          lastSpace = i;
-          hasThereBeenASpaceOnThisLine = true;
-        }
-        if (curX > maxWidth) {
-          if (!hasThereBeenASpaceOnThisLine) {
-            lastSpace = i;
-          } else {
-            str[lastSpace] = '\n';
-            i = lastSpace;
-            lastSpace = i+1;
+        if (curX > maxWidth) { // if printing this character would make it chopped off
+          if (str[i] == ' ') { // if this is a space
+            str[i] = '\n'; // make it a newline
+          } else { // this is a character
+            if (!thereHasBeenASpaceOnThisLine) { // there haven't been any spaces on this line, this is a super long word
+              ; // do nothing, default adafruit gfx text wrapping will work, and manually inserting a newline character here would be a pain  
+            } else { // this character starts a word and there has been a space on this line
+              if (thereHasBeenASecondSpace) {
+                str[indexOfLastSpace] = '\n'; // replace the last space on this line with a newline
+                i = indexOfLastSpace; // seek back to put the cursor on the new line, so the next iteration of the for loop will be on this first character on this line
+              }
+            }
           }
-          curX = 0;
-          hasThereBeenASpaceOnThisLine = false;
+          curX = 0; // not trying to align with whereever first character as printed
+          thereHasBeenASpaceOnThisLine = false;
+          thereHasBeenASecondSpace = false;
+        } else {
+          if (str[i] == ' ') {
+            if (thereHasBeenASpaceOnThisLine) {
+              thereHasBeenASecondSpace = true;
+            }
+            thereHasBeenASpaceOnThisLine = true;
+            indexOfLastSpace = i;
+          }
         }
       }
       
