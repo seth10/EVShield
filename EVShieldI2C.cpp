@@ -52,7 +52,7 @@ uint32_t EVShieldI2C::readLong  (uint8_t location)
 uint8_t*  EVShieldI2C::readRegisters  (uint8_t  startRegister, uint8_t  bytes, uint8_t* buf)
 {
   if (!m_protocol) return BaseI2CDevice::readRegisters(startRegister, bytes, buf);
-	else             return SoftI2cMaster::readRegisters(startRegister, bytes, buf);
+  else             return SoftI2cMaster::readRegisters(startRegister, bytes, buf);
 }
 
 
@@ -110,7 +110,7 @@ bool EVShieldI2C::setAddress  (uint8_t address)
     // regardless of protocol, set the address
   BaseI2CDevice::setAddress(address);
   SoftI2cMaster::setAddress(address);
-	return true;
+  return true;
 }
 
 

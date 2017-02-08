@@ -20,26 +20,16 @@
 
 #include "EVShield.h"
 #include "Wire.h"
-#if defined(ARDUINO_ARC32_TOOLS)
-  #include "CurieTimerOne.h"
-#else
-  #include "MsTimer2.h"
-#endif
-static void pingEV();
+static void pingEV(void *pArg);
 
-#if defined(__AVR__)
-	static void callbackLED();
-#elif defined(__PIC32MX__)
-	uint32_t callbackLED(uint32_t);
-#endif
+extern "C" {
+#include "user_interface.h" # for NodeMCU with ESP2866 timer
+}
+
+os_timer_t pingEVtimer;
 
 byte initCounter = 0;
 bool btnState_go, btnState_left, btnState_right;
-uint8_t redLED, redLED_cp;
-uint8_t greenLED, greenLED_cp;
-uint8_t blueLED, blueLED_cp;
-
-bool toggle2 = 0;
 
 bool format_bin(uint8_t i, char *s)
 {
@@ -59,6 +49,7 @@ bool format_bin(uint8_t i, char *s)
 
 
 EVShield::EVShield(uint8_t i2c_address_a, uint8_t i2c_address_b)
+: screen((void *) this, (SH_BankPort)-1)
 {
   if ( i2c_address_a != SH_Bank_A) bank_a.setAddress(i2c_address_a);
   if ( i2c_address_b != SH_Bank_B) bank_b.setAddress(i2c_address_b);
@@ -67,10 +58,10 @@ EVShield::EVShield(uint8_t i2c_address_a, uint8_t i2c_address_b)
 void EVShield::init(SH_Protocols protocol)
 {
     while (initCounter < 5){
-    //Serial.println(initCounter);
-    I2CTimer();
-	initProtocols(protocol);    
-   }
+        //Serial.println(initCounter);
+        I2CTimer();
+        initProtocols(protocol);    
+    }
 }
 
 void EVShield::initProtocols(SH_Protocols protocol)
@@ -132,24 +123,8 @@ void EVShield::initProtocols(SH_Protocols protocol)
 
 void EVShield::I2CTimer()
 {
-#if defined(ARDUINO_ARC32_TOOLS)
-  CurieTimerOne.start(300000, pingEV); // in microseconds
-#else
-  //TCNT2  = 0; 
-  MsTimer2::set(300, pingEV); // 300ms period
-  MsTimer2::start(); 
-#endif
-}
-
-void EVShield::initLEDTimers()
-{
-  #if defined(__AVR__)
-
-	  MsTimer2::set(3, callbackLED);
-	  MsTimer2::start();
-#elif defined(__PIC32MX__)
-	  attachCoreTimerService(callbackLED);
-#endif
+  os_timer_setfn(&pingEVtimer, pingEV, NULL);
+  os_timer_arm(&pingEVtimer, 300, true); // 300ms period, true to repeat
 }
 
 EVShieldBankB::EVShieldBankB(uint8_t i2c_address)
@@ -163,22 +138,7 @@ EVShieldBank::EVShieldBank(uint8_t i2c_address)
 {
 
 }
-/*
-void EVShield::I2CTimer(){
-  //set timer2 interrupt at 64kHz
-  TCCR2A = 0;// set entire TCCR2A register to 0
-  TCCR2B = 0;// same for TCCR2B
-  TCNT2  = 0;//initialize counter value to 0
-  // set compare match register for 64khz increments or 300ms
-  OCR2A = 74;// = (16*10^6) / (64000*3.3333) - 1 (must be <256)
-  // turn on CTC mode
-  TCCR2A |= (1 << WGM21);
-  // Set CS21 bit for 64 prescaler
-  TCCR2B |= (1 << CS22);   
-  // enable timer compare interrupt
-  TIMSK2 |= (1 << OCIE2A);  
-}
-*/
+
 // provided for backword compatibility with nxshield programs.
 int EVShieldBank::nxshieldGetBatteryVoltage()
 {
@@ -302,22 +262,10 @@ bool EVShieldBank::motorSetSpeedPID(uint16_t Kp, uint16_t Ki, uint16_t Kd)
   return writeRegisters(SH_SPEED_PID, 6);
 }
 
-bool EVShieldBank::centerLedSetRGB(uint8_t R, uint8_t G, uint8_t B)
-{
-  bool b;
-  writeByteToBuffer(_i2c_buffer, R);
-  writeByteToBuffer(_i2c_buffer+1,G);
-  writeByteToBuffer(_i2c_buffer+2,B);
-  b = writeRegisters(SH_CENTER_RGB_LED, 3);
-  delay(1);   // required to avoid subsequent i2c errors.
-  return b;
-}
-// Set the RGBLED that shows RGB color
 
 // TODO: it's noticed that i2c call made after ledSetRGB call fails.
 // a delay is added to avoid the errors, but
 // see why it fails and find a better solution.
-
 bool EVShieldBank::ledSetRGB(uint8_t R, uint8_t G, uint8_t B)
 {
   bool b;
@@ -413,7 +361,7 @@ void evshieldSetEncoderSpeedTimeAndControlInBuffer(
   uint8_t duration,  // in seconds
   uint8_t control)  // control flags
 {
-  writeLongToBuffer(buffer + 0, encoder);
+  writeLongToBuffer(buffer + 0, (uint32_t)(int32_t)encoder);
   buffer[4] = (uint8_t)(int8_t)speed;
   buffer[5] = duration;
   buffer[6] = 0;      // command register B
@@ -622,7 +570,6 @@ uint8_t EVShieldBank::motorRunTachometer(
 
   if (wait_for_completion == SH_Completion_Wait_For)
   {
-    //delay(50);
     s = motorWaitUntilTachoDone(which_motors);
   }
   return s;
@@ -757,117 +704,29 @@ int EVShieldBankB::sensorReadRaw(uint8_t which_sensor)
   }
 }
 
-void pingEV()
+void pingEV(void *pArg)
 {
-    #if defined(ARDUINO_ARC32_TOOLS)
-        Wire.beginTransmission(0x34);
-        Wire.endTransmission();
-    #else
-        TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
-        while ((TWCR & (1<<TWINT)) == 0);
-        TWDR = 0x34;
-        TWCR = (1<<TWINT)|(1<<TWEN);
-        while ((TWCR & (1<<TWINT)) == 0);
-        TWCR = (1<<TWINT)|(1<<TWSTO)|(1<<TWEN);
-        TCNT2  = 0;//initialize counter value to 0    
-        /*
-        if (toggle2)
-        {
-          digitalWrite(13, HIGH);
-          toggle2 = 0;
-        }
-        else
-        {
-          digitalWrite(13, LOW);
-          toggle2 = 1; 
-        }
-        */
-    #endif
+  Wire.beginTransmission(SH_Bank_A);
+  Wire.endTransmission();
 }
 
-#if defined(__AVR__)
-
-void callbackLED()
+bool EVShield::isKeyPressed()
 {
-  static uint8_t index = 1;
-
-  //pinMode(BTN_GO,INPUT);
-  //btnState_go = !digitalRead(BTN_GO);
-  //pinMode(BTN_GO,OUTPUT);
-
-  pinMode(BTN_LEFT,INPUT);
-  btnState_left = !digitalRead(BTN_LEFT);
-  pinMode(BTN_LEFT,OUTPUT);
-
-  pinMode(BTN_RIGHT,INPUT);
-  btnState_right = !digitalRead(BTN_RIGHT);
-  pinMode(BTN_RIGHT,OUTPUT);
-
-  digitalWrite(LED_RED, !redLED_cp&0x01);
-  digitalWrite(LED_GREEN, !greenLED_cp&0x01);
-  digitalWrite(LED_BLUE, !blueLED_cp&0x01);
-
-  if (index == 8){
-    index = 1;
-    redLED_cp   = redLED;
-    greenLED_cp = greenLED;
-    blueLED_cp  = blueLED;
-  }
-  else{
-    redLED_cp    = redLED_cp   >>1;
-    greenLED_cp  = greenLED_cp >>1;
-    blueLED_cp   = blueLED_cp  >>1;
-    index ++;
-  }
-
-}
-#elif defined(__PIC32MX__)
-uint32_t callbackLED(uint32_t currentTime)
-{
-  static uint8_t index = 1;
-
-  //pinMode(BTN_GO,INPUT);
-  //btnState_go = !digitalRead(BTN_GO);
-  //pinMode(BTN_GO,OUTPUT);
-
-  pinMode(BTN_LEFT,INPUT);
-  btnState_left = !digitalRead(BTN_LEFT);
-  pinMode(BTN_LEFT,OUTPUT);
-
-  pinMode(BTN_RIGHT,INPUT);
-  btnState_right = !digitalRead(BTN_RIGHT);
-  pinMode(BTN_RIGHT,OUTPUT);
-
-  digitalWrite(LED_RED, !redLED_cp&0x01);
-  digitalWrite(LED_GREEN, !greenLED_cp&0x01);
-  digitalWrite(LED_BLUE, !blueLED_cp&0x01);
-
-  if (index == 8){
-    index = 1;
-    redLED_cp   = redLED;
-    greenLED_cp = greenLED;
-    blueLED_cp  = blueLED;
-  }
-  else{
-    redLED_cp    = redLED_cp   >>1;
-    greenLED_cp  = greenLED_cp >>1;
-    blueLED_cp   = blueLED_cp  >>1;
-    index ++;
-  }
-	return (currentTime + CORE_TICK_RATE*3);
-}
-
-#endif
-
-bool EVShield::getButtonState(uint8_t btn) {
   uint8_t bVal;
   bVal = bank_a.readByte(SH_BTN_PRESS);
 
-  return (bVal == btn);
+  return (bVal == 1);
 }
 
-void EVShield::waitForButtonPress(uint8_t btn, uint8_t led_pattern) {
-  while(!getButtonState(btn)){
+void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
+{
+  bank_a.ledSetRGB(red,green,blue);
+  bank_b.ledSetRGB(red,green,blue);
+}
+
+void EVShield::waitForButtonPress(uint8_t led_pattern)
+{
+  while(!isKeyPressed()){
       switch (led_pattern) {
         case 1:
           ledBreathingPattern();
@@ -883,58 +742,46 @@ void EVShield::waitForButtonPress(uint8_t btn, uint8_t led_pattern) {
   if (led_pattern != 0) ledSetRGB(0,0,0);
 }
 
-void EVShield::ledBreathingPattern() {
-    static int breathNow = 0;
-    int i;
-
-    if ( breathNow > 800 && breathNow < 6400 ) {
-        // LED intensity rising
-        i = breathNow/800;
-        ledSetRGB(0, i, i);
-        delayMicroseconds(150);
-        if ( i == 8 ) delayMicroseconds(200);
-    } else if (breathNow > 6400 && breathNow < 13400 ) {
-        // LED intensity falling
-        i = (14400-breathNow)/1000;
-        ledSetRGB(0, i, i);
-        delayMicroseconds(200);
-        if ( i == 8 ) delayMicroseconds(200);
-    } else {
-        // LED intensity stable.
-        ledSetRGB(0,1,1);
-        delayMicroseconds(50);
-    }
-    breathNow ++;
-}
-
-void EVShield::ledSetRGB(uint8_t red, uint8_t green, uint8_t blue)
+static int ledBreathingPatternTimer = 0;
+// Illuminate LEDs a cyan color, smoothly increasing and decreasing intensity
+// with a 1-second period.
+void EVShield::ledBreathingPattern()
 {
-  bank_a.ledSetRGB(red,green,blue);
-  //delay(100);
-  bank_b.ledSetRGB(red,green,blue);
-  //delay(100);
+    if (ledBreathingPatternTimer > 100)
+        ledBreathingPatternTimer = 0;
+    
+    double intensity;
+    if (ledBreathingPatternTimer < 50)
+        intensity = ledBreathingPatternTimer/50.0; // 0.0 to 1.0
+    else
+        intensity = (100-ledBreathingPatternTimer)/50.0; // 1.0 to 0.0
+    
+    ledSetRGB(0, intensity*255, intensity*255);
+    delay(10); // 10 ms * 100 unit period = 1 second loop
+    ledBreathingPatternTimer++;
 }
 
-void EVShield::ledHeartBeatPattern() {
-  static int breathNow = 0;
-  int i;
-
-  if ( breathNow > 800 && breathNow < 6400 ) {
-    // LED intensity rising
-    i = breathNow/800;
-    ledSetRGB(0, i, i);
-    //delayMicroseconds(150);
-    if ( i == 8 ) delayMicroseconds(200);
-  } else if (breathNow > 6400 && breathNow < 13400 ) {
-    // LED intensity falling
-    i = (14400-breathNow)/1000;
-    ledSetRGB(0, i, i);
-    //delayMicroseconds(200);
-    if ( i == 8 ) delayMicroseconds(200);
-  } else {
-    // LED intensity stable.
-    ledSetRGB(0,1,1);
-    delayMicroseconds(10);
-  }
-  breathNow ++;
+static int ledHeartBeatPatternTimer = 0;
+// Illuminate LEDs a cyan color, flashing two fast beats and then a pause
+// with a 1-second total period.
+void EVShield::ledHeartBeatPattern()
+{
+    if (ledHeartBeatPatternTimer > 100)
+        ledHeartBeatPatternTimer = 0;
+    
+    double intensity;
+    if (ledHeartBeatPatternTimer < 15)
+        intensity = ledHeartBeatPatternTimer/15.0; // 0.0 to 1.0
+    else if (ledHeartBeatPatternTimer >= 15 && ledHeartBeatPatternTimer < 30)
+        intensity = (30-ledHeartBeatPatternTimer)/15.0; // 1.0 to 0.0
+    else if (ledHeartBeatPatternTimer >= 30 && ledHeartBeatPatternTimer < 45)
+        intensity = (ledHeartBeatPatternTimer-30)/15.0; // 0.0 to 1.0
+    else if (ledHeartBeatPatternTimer >= 45 && ledHeartBeatPatternTimer < 60)
+        intensity = (60-ledHeartBeatPatternTimer)/15.0; // 1.0 to 0.0
+    else if (ledHeartBeatPatternTimer >= 60)
+        intensity = 0;
+    
+    ledSetRGB(0, intensity*255, intensity*255);
+    delay(10); // 10 ms * 100 unit period = 1 second loop
+    ledHeartBeatPatternTimer++;
 }

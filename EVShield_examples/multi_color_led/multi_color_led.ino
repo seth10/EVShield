@@ -76,4 +76,22 @@ void multi_color_blink(){
    evshield.ledSetRGB(i,0,0);
    delay(GLOBAL_DELAY/2);
  } 
+ 
+ for (int i=0; i<255; i++){
+   evshield.bank_a.ledSetRGB(255-i, i, 0); // bank a: red to green
+   evshield.bank_b.ledSetRGB(255-i, 0, i); // bank b: red to blue
+   delay(GLOBAL_DELAY);
+ }
+ 
+ for (int i=0; i<255; i++){
+   evshield.bank_a.ledSetRGB(0, 255-i,     i); // bank a: green to blue
+   evshield.bank_b.ledSetRGB(0,     i, 255-i); // bank b: blue to green
+   delay(GLOBAL_DELAY);
+ }
+ 
+ for (int i=0; i<255; i++){
+   evshield.bank_a.ledSetRGB(i,     0, 255-i); // bank a: blue to red
+   evshield.bank_b.ledSetRGB(i, 255-i,     0); // bank b: green to red
+   delay(GLOBAL_DELAY);
+ }
 }

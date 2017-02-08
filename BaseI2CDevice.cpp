@@ -21,23 +21,7 @@
 */
 
 #include "BaseI2CDevice.h"
-#if defined(ARDUINO_ARC32_TOOLS)
-  #include "CurieTimerOne.h"
-#else
-  #include "MsTimer2.h"
-#endif
 #include <Wire.h>
-
-extern "C" {
-#if ( ARDUINO == 10608 )
-#include "../../hardware/arduino/avr/libraries/Wire/src/utility/twi.h"
-#elif ( ARDUINO == 10605 )
-#include "../../hardware/arduino/avr/libraries/Wire/utility/twi.h"
-#else
-uint8_t twi_writeTo(uint8_t, uint8_t*, uint8_t, uint8_t, uint8_t);
-#endif
-
-}
 
 // Max I2C message length is 16 bytes.  
 const int BUFFER_LEN = 16;  
@@ -65,7 +49,7 @@ BaseI2CDevice::BaseI2CDevice(uint8_t i2c_address)
 void BaseI2CDevice::initProtocol()
 {
   if ( b_initialized ) return;
-  Wire.begin();
+  Wire.begin(D2,D3);
   b_initialized = true;
 }
 
@@ -81,11 +65,6 @@ uint8_t* BaseI2CDevice::readRegisters(
   uint8_t  buffer_length,    // (optional) length of user-supplied buffer
   bool     clear_buffer)    // should we zero out the buffer first? (optional)
 {
-  #if defined(ARDUINO_ARC32_TOOLS)
-    CurieTimerOne.rdRstTickCount();
-  #else
-    MsTimer2::reset();
-  #endif
   if (!buffer)
   {
     buffer = _buffer;
@@ -105,33 +84,19 @@ uint8_t* BaseI2CDevice::readRegisters(
 
   // We write to the I2C device to tell it where we want to read from
   Wire.beginTransmission(_device_address);
-#if defined(ARDUINO) && ARDUINO >= 100
-    Wire.write(start_register);
-#else
-    Wire.send(start_register);
-#endif
-    //Wire.send(bytes_to_read);
-    Wire.endTransmission();
+  Wire.write(start_register);
+  Wire.endTransmission();
 
     // Now we can read the data from the device
   Wire.requestFrom(_device_address, bytes_to_read);
 
-    for (uint8_t index = 0; Wire.available(); ++index)
-    {
-#if defined(ARDUINO) && ARDUINO >= 100
-      buffer[index] = Wire.read();
-#else
-      buffer[index] = Wire.receive();
-#endif
-    }
+  for (uint8_t index = 0; Wire.available(); ++index)
+  {
+    buffer[index] = Wire.read();
+  }
 
-    _write_error_code = Wire.endTransmission();
-        
-  #if defined(ARDUINO_ARC32_TOOLS)
-    CurieTimerOne.rdRstTickCount();
-  #else
-    MsTimer2::reset();
-  #endif
+  _write_error_code = Wire.endTransmission();
+
   return buffer;
 }
 
@@ -179,11 +144,6 @@ bool BaseI2CDevice::writeRegisters(
   uint8_t  bytes_to_write,   // number of bytes to write
   uint8_t* buffer)    // optional user-supplied buffer
 {
-  #if defined(ARDUINO_ARC32_TOOLS)
-    CurieTimerOne.rdRstTickCount();
-  #else
-    MsTimer2::reset();
-  #endif
   if (!buffer)
   {
     buffer = _buffer;
@@ -191,29 +151,16 @@ bool BaseI2CDevice::writeRegisters(
 
   // We write to the I2C device to tell it where we want to read from and how many bytes
   Wire.beginTransmission(_device_address);
-#if defined(ARDUINO) && ARDUINO >= 100
   Wire.write(start_register);
-#else
-  Wire.send(start_register);
-#endif
 
   // Send the data
   for (uint8_t index = 0; index < bytes_to_write; ++index)
   {
-#if defined(ARDUINO) && ARDUINO >= 100
     Wire.write(buffer[index]);
-#else
-    Wire.send(buffer[index]);
-#endif
   }
 
   _write_error_code = Wire.endTransmission();
 
-  #if defined(ARDUINO_ARC32_TOOLS)
-    CurieTimerOne.rdRstTickCount();
-  #else
-    MsTimer2::reset();
-  #endif
   return _write_error_code == 0;  // 0 indicates success
 }
 
@@ -293,15 +240,8 @@ bool BaseI2CDevice::checkAddress()
 {
   uint8_t *txBuffer;
   int8_t x = 1;
-#if defined(__PIC32MX__)
+
   x = twi_writeTo(_device_address, txBuffer, 0, 1) == 0;
-#else
-  #if defined(ARDUINO) && ARDUINO <= 100
-    x = twi_writeTo(_device_address, txBuffer, 0, 1) == 0;
-  #else
-    x = twi_writeTo(_device_address, txBuffer, 0, 1, 1) == 0;
-  #endif
-#endif
   return (x != 0);
 }
 

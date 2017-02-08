@@ -35,24 +35,7 @@ void SoftI2cMaster::initProtocol(uint8_t sclPin, uint8_t sdaPin){
   if ( initialized ) return;
 
   if (!sclPin && !sdaPin){
-   #if defined(__AVR__)
-    #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega8__) || defined(__AVR_ATmega328P__)
-      sclPin_ = 19;   // A5
-      sdaPin_ = 18;   // A4
-    #else
-      sclPin_ = 21;
-      sdaPin_ = 20;
-    #endif
-#elif defined(__PIC32MX__)
-     #if defined(_BOARD_UNO_)
-     	 sclPin_ = 46;   // use SCL pin 
-    	 sdaPin_ = 45;   // use SDA pin 
-     #elif defined(_BOARD_MEGA_)
-     	 sclPin_ = 21;
-       sdaPin_ = 20;
-     #endif
-
-#endif
+    // REMOVED #if defined(__AVR__)  #elif defined(__PIC32MX__) #if defined(_BOARD_UNO_) #elif defined(_BOARD_MEGA_)
   }
   else {
     sclPin_ = sclPin;

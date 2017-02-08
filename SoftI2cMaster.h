@@ -20,11 +20,9 @@
  */
 #ifndef SOFT_I2C_MASTER
 #define SOFT_I2C_MASTER
-#if defined(ARDUINO) && ARDUINO >= 100
+
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
+
 #include <stddef.h>
 
 // delay used to tweek signals
