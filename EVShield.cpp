@@ -806,7 +806,7 @@ void pingEV(void *pArg)
 void pingEV()
 #endif
 {
-    #if defined(ARDUINO_ARC32_TOOLS) || defined(ESP8266) || defined(ARDUINO_AVR_NANO)
+    #if defined(ARDUINO_ARC32_TOOLS) || defined(ARDUINO_SAMD_ZERO) || defined(ESP8266) || defined(ARDUINO_AVR_NANO)
         Wire.beginTransmission(0x34);
         Wire.endTransmission();
     #else
