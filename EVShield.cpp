@@ -66,6 +66,7 @@ bool format_bin(uint8_t i, char *s)
     }
     b = b>>1;
   }
+  return true; // really shouldn't be returning anything, but can't change method signatures in public libraries 🤷 ¯\_(ツ)_/¯
 }
 
 
@@ -520,7 +521,7 @@ uint8_t EVShieldBank::motorIsTimeDone(SH_Motor which_motors)
       //}
     }
   }
-
+  return 0; // TODO: added to fix compiler warning, see header file to implement intended return value
 }
 
 // waited until a timed command finishes
@@ -533,6 +534,7 @@ uint8_t EVShieldBank::motorWaitUntilTimeDone(SH_Motor which_motors)
     delay (50);
     s = motorIsTimeDone(which_motors);  // fixed.
   }
+  return 0; // TODO: added to fix compiler warning, see header file to implement intended return value
 }
 
 // True when a command based on using the motor encoder completes
@@ -565,6 +567,7 @@ uint8_t EVShieldBank::motorIsTachoDone(SH_Motor which_motors)
       //}
     }
   }
+  return 0; // TODO: added to fix compiler warning, see header file to implement intended return value
 }
 
 // waited until a turn-by-degrees command ends
@@ -577,6 +580,7 @@ uint8_t EVShieldBank::motorWaitUntilTachoDone(SH_Motor which_motors)
     delay (50);
     s = motorIsTachoDone(which_motors);
   }
+  return 0; // TODO: added to fix compiler warning, see header file to implement intended return value
 }
 
 
@@ -597,6 +601,7 @@ inline uint8_t calcNextActionBits(SH_Next_Action next_action)
     return SH_CONTROL_BRK;
   else if (next_action == SH_Next_Action_BrakeHold)
     return SH_CONTROL_BRK | SH_CONTROL_ON;
+  return 0; // TODO: added to fix compiler warning
 }
 
 void EVShieldBank::motorRunUnlimited(
@@ -627,6 +632,7 @@ uint8_t EVShieldBank::motorRunSeconds(
   {
     return motorWaitUntilTimeDone(which_motors);
   }
+  return 0; // TODO: added to fix compiler warning, see header file to implement intended return value
 }
 
 // runs the motors until the tachometer reaches a certain position
@@ -667,7 +673,7 @@ uint8_t EVShieldBank::motorRunTachometer(
   {
     //delay(50);
     s = motorWaitUntilTachoDone(which_motors);
-  }
+  } else { s = 0; /* TODO: added to fix compiler warning, see header file to implement intended return value */ }
   return s;
 }
 
@@ -783,7 +789,6 @@ bool EVShieldBankB::sensorSetType(uint8_t which_sensor, uint8_t sensor_type)
 
 int EVShieldBankB::sensorReadRaw(uint8_t which_sensor)
 {
-  int a;
   switch (which_sensor) {
     case 1:
       // sensor port 1 behaves same as BankA

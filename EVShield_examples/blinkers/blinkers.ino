@@ -37,8 +37,6 @@ EVShield          evshield(0x34,0x36);
 void
 setup()
 {
-    char            str[50];
-
     Serial.begin(115200);       // start serial for output
 
     //
@@ -60,8 +58,6 @@ setup()
 void
 loop()
 {
-    char str[50];  
-
     //
     // see if left button is pressed.
     //
